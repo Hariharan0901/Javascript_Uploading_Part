@@ -1,0 +1,144 @@
+PageModule.prototype.parseOnboardingData = function (excelData, onboardingDetailsBO) {
+    let boData = {
+      onboardingBOArray: [],
+      errorBOArray: [],
+      successArray: []
+    };
+
+
+    return new Promise(function (resolve) {
+      let excelFile = excelData[0];
+      let reader = new FileReader();
+
+      function formatDate(dateString) {
+        if (!dateString) return '';
+        let date = new Date(dateString);
+        let dd = String(date.getDate()).padStart(2, '0');
+        let mm = String(date.getMonth() + 1).padStart(2, '0');
+        let yyyy = date.getFullYear();
+        return `${yyyy}-${mm}-${dd}`;
+      }
+
+      reader.onload = function (e) {
+        let data = e.target.result;
+        let workBook = XLSX.read(data, { type: 'binary' });
+        let allSheets = workBook.SheetNames;
+
+        for (let i = 0; i < allSheets.length; i++) {
+          let sheetRows = XLSX.utils.sheet_to_json(workBook.Sheets[allSheets[i]]);
+
+
+          for (let index = 0; index < sheetRows.length; index++) {
+
+            let parsedRow = sheetRows[index];
+            parsedRow.dateOfJoining = formatDate(parsedRow.dateOfJoining);
+
+
+            let existingRecord = onboardingDetailsBO.find(ele => ele.employeeID === parsedRow.employeeID);
+            if (!existingRecord) {
+              boData.onboardingBOArray.push({
+                "employeeID": parsedRow.employeeID,
+                "candidateName": parsedRow.candidateName,
+                "mailID": parsedRow.mailID,
+                "dateOfJoining": parsedRow.dateOfJoining,
+                "globalEmployeeID": parsedRow.globalEmployeeID,
+                "workLocation": parsedRow.workLocation,
+                "userID": parsedRow.userID,
+                "allocationOfN1": "No",
+                "allocationToProjectByPSC": "No",
+                "assetAllocation": "Yes",
+                "assetConfigured": "Yes",
+                "assignmentOfCapabilitySkillGro": "No",
+                "buddyAssingment": "No",
+                "communicationOnSPOCContactPoin": "No",
+                "credentialCreation": "Yes",
+                "employeeEntryInHCFile": "No",
+                "iDCardsAllocation": "Yes",
+                "manadoryTraining": "No",
+                "oraclePBSInductionTraining": "No",
+                "updatingGTDwithselfinformation": "No",
+                "inductionTrainingAttended": "No",
+                "skillSurvey": "No",
+                "recruitmentCommunicationToPSCT": "Yes",
+                "shadowDiary": "No",
+                "uploadOfResume": "No",
+                "welcomeEmail": "Yes",
+                "lateral": "No"
+              });
+              boData.successArray.push({
+                "employeeID": parsedRow.employeeID,
+                "candidateName": parsedRow.candidateName
+              });
+            } else {
+              boData.errorBOArray.push({
+                "employeeID": parsedRow.employeeID,
+                "error": "Employee already exists"
+              });
+            }
+          }
+        }
+        resolve(boData);
+        console.log("onboardingDetails Array:", boData.onboardingBOArray);
+        console.log("successArray:", boData.successArray);
+        console.log("errorBOArray:", boData.errorBOArray);
+
+      };
+      reader.readAsBinaryString(excelFile);
+
+    });
+
+
+  };
+
+
+
+  PageModule.prototype.BatchProcessingOnboardingdataBO = function (OnboardingDataArray, operation, BOName, batchSize) {
+    let batchProcessingVariableArray = [];
+
+
+
+    for (let batchStart = 0; batchStart < OnboardingDataArray.length; batchStart += batchSize) {
+      let batchEnd = Math.min(batchStart + batchSize, OnboardingDataArray.length);
+      let batchData = OnboardingDataArray.slice(batchStart, batchEnd);
+
+      for (let index = 0; index < batchData.length; index++) {
+        let data;
+        data = {
+          "id": "part" + index,
+          "path": "/" + BOName + "/",
+          "operation": operation,
+          "payload": {
+            "employeeID": batchData[index].employeeID,
+            "candidateName": batchData[index].candidateName,
+            "mailID": batchData[index].mailID,
+            "dateOfJoining": batchData[index].dateOfJoining,
+            "globalEmployeeID": batchData[index].globalEmployeeID,
+            "workLocation": batchData[index].workLocation,
+            "userID": batchData[index].userID,
+            "allocationOfN1": batchData[index].allocationOfN1,
+            "allocationToProjectByPSC": batchData[index].allocationToProjectByPSC,
+            "assetAllocation": batchData[index].assetAllocation,
+            "assetConfigured": batchData[index].assetConfigured,
+            "assignmentOfCapabilitySkillGro": batchData[index].assignmentOfCapabilitySkillGro,
+            "buddyAssingment": batchData[index].buddyAssingment,
+            "communicationOnSPOCContactPoin": batchData[index].communicationOnSPOCContactPoin,
+            "credentialCreation": batchData[index].credentialCreation,
+            "employeeEntryInHCFile": batchData[index].employeeEntryInHCFile,
+            "iDCardsAllocation": batchData[index].iDCardsAllocation,
+            "manadoryTraining": batchData[index].manadoryTraining,
+            "oraclePBSInductionTraining": batchData[index].oraclePBSInductionTraining,
+            "recruitmentCommunicationToPSCT": batchData[index].recruitmentCommunicationToPSCT,
+            "inductionTrainingAttended": batchData[index].inductionTrainingAttended,
+            "updatingGTDwithselfinformation": batchData[index].updatingGTDwithselfinformation,
+            "skillSurvey": batchData[index].skillSurvey,
+            "shadowDiary": batchData[index].shadowDiary,
+            "uploadOfResume": batchData[index].uploadOfResume,
+            "welcomeEmail": batchData[index].welcomeEmail,
+            "lateral": batchData[index].lateral
+          }
+        }
+        batchProcessingVariableArray.push(data);
+      }
+    }
+    return { parts: batchProcessingVariableArray };
+  };
