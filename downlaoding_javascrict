@@ -1,0 +1,78 @@
+PageModule.prototype.tableDownloadfun = function (adpData) {
+    let multidata = new Array();
+
+    function FileToBytes(s) {
+      let buf = new ArrayBuffer(s.length);
+      let view = new Uint8Array(buf);
+      for (let i = 0; i < s.length; i++)
+        view[i] = s.charCodeAt(i) & 0xFF;
+      return buf;
+    };
+
+    let {employeeID,candidateName,dateOfJoining,workLocation,recruitmentCommunicationToPSCT,credentialCreation,idCardsAllocation,assetAllocation,assetConfigured,employeeEntryInHCFile,updatingGTDwithselfinformation,uploadOfResume,assignmentOfCapabilitySkillGro,allocationOfN1,allocationToProjectByPSC,communicationOnSPOCContactPoin,inductionTrainingAttended,oraclePBSInductionTraining,skillSurvey,onboardingCompleted} = adpData[0];
+
+    multidata.push(Object.keys({ employeeID,candidateName,dateOfJoining,workLocation,recruitmentCommunicationToPSCT,credentialCreation,idCardsAllocation,assetAllocation,assetConfigured,employeeEntryInHCFile,updatingGTDwithselfinformation,uploadOfResume,assignmentOfCapabilitySkillGro,allocationOfN1,allocationToProjectByPSC,communicationOnSPOCContactPoin,inductionTrainingAttended,oraclePBSInductionTraining,skillSurvey,onboardingCompleted}));
+
+    for (let i = 0; i < adpData.length; i++) {
+      {employeeID,candidateName,dateOfJoining,workLocation,recruitmentCommunicationToPSCT,credentialCreation,idCardsAllocation,assetAllocation,assetConfigured,employeeEntryInHCFile,updatingGTDwithselfinformation,uploadOfResume,assignmentOfCapabilitySkillGro,allocationOfN1,allocationToProjectByPSC,communicationOnSPOCContactPoin,inductionTrainingAttended,oraclePBSInductionTraining,skillSurvey,onboardingCompleted} = adpData[i];
+      
+      multidata.push(Object.values({ employeeID,candidateName,dateOfJoining,workLocation,recruitmentCommunicationToPSCT,credentialCreation,idCardsAllocation,assetAllocation,assetConfigured,employeeEntryInHCFile,updatingGTDwithselfinformation,uploadOfResume,assignmentOfCapabilitySkillGro,allocationOfN1,allocationToProjectByPSC,communicationOnSPOCContactPoin,inductionTrainingAttended,oraclePBSInductionTraining,skillSurvey,onboardingCompleted}).map(val => val ?? ''));
+    }
+
+
+    // for (let i = 0; i < adpData.length; i++) {
+    //   let instanceArray = [];
+    //   if (i == 0) {
+    //     instanceArray.push('employeeID');
+    //     instanceArray.push('grade');
+    //     instanceArray.push('Employee Name');
+    //     instanceArray.push('Capability');
+    //     instanceArray.push('skillGroup');
+
+    //     multidata.push(instanceArray); //['employeeID','can]
+
+
+    //   }
+    //   else {
+    //     instanceArray.push(BenchArray[i - 1]['employeeId']);
+    //     instanceArray.push(BenchArray[i - 1]['grade']);
+    //     instanceArray.push(BenchArray[i - 1]['Employee Name']);
+    //     instanceArray.push(BenchArray[i - 1]['Capability']);
+    //     instanceArray.push(BenchArray[i - 1]['skillGroup']);
+
+
+
+    //     multidata.push(Object.values(adpData[i]).map((val) => val ? val : ''));
+    //   }
+
+    // }
+    let wb = XLSX.utils.book_new();
+    wb.SheetNames.push("Onboarding Details");
+    let ws = XLSX.utils.aoa_to_sheet(multidata);
+    wb.Sheets["Onboarding Details"] = ws;
+    let fileBytes = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+
+    fileBytes = FileToBytes(fileBytes);
+
+    let blob = new Blob([fileBytes], { type: 'octet/stream' });
+    let filename = "Onboarding Details_" + new Date().toISOString().split('T')[0] + ".xlsx";
+
+    if (navigator.msSaveBlob) {
+      navigator.msSaveBlob(blob, filename);
+    }
+    else {
+      let link = document.createElement("a");
+      if (link.download !== undefined) { // feature detection
+        // Browsers that support HTML5 download attribute
+        let url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.setAttribute("target", "_blank");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        // console.log('Link' + JSON.stringify(link));
+        document.body.removeChild(link);
+      }
+    }
+  };
