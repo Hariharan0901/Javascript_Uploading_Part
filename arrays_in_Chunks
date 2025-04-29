@@ -1,0 +1,22 @@
+function chunkarray(array,chunksize){
+    const chunks=[];
+    for(let i=0;i<array.length;i+=chunksize){
+        const chunk=array.slice(i,i+chunksize);
+        chunks.push(chunk);
+    }
+    return chunks;
+};
+const employees = [
+  { empname: "John Doe", empid: "E001", age: 29, gender: "Male" },
+  { empname: "Jane Smith", empid: "E002", age: 34, gender: "Female" },
+  { empname: "Michael Brown", empid: "E003", age: 40, gender: "Male" },
+  { empname: "Emily Davis", empid: "E004", age: 25, gender: "Female" },
+  { empname: "David Johnson", empid: "E005", age: 45, gender: "Male" },
+  { empname: "Sarah Wilson", empid: "E006", age: 32, gender: "Female" },
+  { empname: "James Lee", empid: "E007", age: 38, gender: "Male" },
+  { empname: "Anna Martin", empid: "E008", age: 27, gender: "Female" },
+  { empname: "Robert Garcia", empid: "E009", age: 50, gender: "Male" },
+  { empname: "Laura Perez", empid: "E010", age: 30, gender: "Female" }
+];
+
+console.log(chunkarray(employees,2));
